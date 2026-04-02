@@ -29,7 +29,8 @@ class Process implements Runnable {
     private int burstTime; // Total time the process requires to complete (in milliseconds)
     private int timeQuantum; // Time slice (time quantum) allowed per CPU access (in milliseconds)
     private int remainingTime; // Time left for the process to finish its execution
-    private int priority;
+    private int priority;//feature 1
+    private long startTime; // feature 3
 
     // Constructor to initialize the process with name, burst time, and time quantum
     public Process(String name, int burstTime, int timeQuantum) {
@@ -37,7 +38,8 @@ class Process implements Runnable {
         this.burstTime = burstTime;
         this.timeQuantum = timeQuantum;
         this.remainingTime = burstTime; // Initially, remaining time is equal to the burst time
-        this.priority = (int) (Math.random() * 5) + 1;
+        this.priority = (int) (Math.random() * 5) + 1;//feature 1
+        this.startTime = System.currentTimeMillis();//feature 3 
     }
     public int getPriority() {
     return priority;
@@ -287,6 +289,22 @@ private static int contextSwitches = 0;
         // print feature 2
 System.out.println(Colors.BOLD + Colors.CYAN + "Total context switches: "
                    + Colors.RESET + Colors.YELLOW + contextSwitches + Colors.RESET + "\n");
+        
+        //  ( print Feature 3: Waiting Time Summary)
+System.out.println(Colors.BOLD + Colors.PURPLE + "╔" + "═".repeat(61) + "╗" + Colors.RESET);
+System.out.printf(Colors.BOLD + Colors.PURPLE + "║ %-18s | %-18s | %-18s ║\n" + Colors.RESET, 
+                  "Process Name", "Burst Time (ms)", "Waiting Time (ms)");
+System.out.println(Colors.BOLD + Colors.PURPLE + "╠" + "═".repeat(19) + "╪" + "═".repeat(20) + "╪" + "═".repeat(20) + "╣" + Colors.RESET);
+
+// نفترض أن allProcessesList هي القائمة التي تحتوي على جميع العمليات
+for (Process p : allProcessesList) {
+    long waitingTime = System.currentTimeMillis() - p.getStartTime() - p.getBurstTime();
+    if (waitingTime < 0) waitingTime = 0; // لضمان عدم ظهور قيم سالبة
+    
+    System.out.printf(Colors.CYAN + "║ %-18s " + Colors.RESET + "| " + Colors.YELLOW + "%-18d " + Colors.RESET + "| " + Colors.RED + "%-18d " + Colors.CYAN + "║\n" + Colors.RESET, 
+                      p.getName(), p.getBurstTime(), waitingTime);
+}
+System.out.println(Colors.BOLD + Colors.PURPLE + "╚" + "═".repeat(61) + "╝" + Colors.RESET);
     }
     
     // Method to add a process to the queue and map, while printing a "ready" message
